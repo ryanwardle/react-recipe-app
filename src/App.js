@@ -8,31 +8,50 @@ const App = () => {
 
   const [recipes, setRecipes] = useState([]);
   const [search, setSearch] = useState(''); 
+  const [query, setQuery] = useState('chicken');
 
+  // TUTORIAL HAD GETRECIPES OUTSIDE OF USEEFFECT, (EDITED OUT BELOW), BUT REACT DOCS AND LINTER SAY DO IT THIS WAY
   useEffect(() => {
+    const getRecipes = async () => {
+      const response = await fetch(`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+      const data = await response.json();
+      setRecipes(data.hits);
+    }
     getRecipes();
-  }, []);
+  }, [query]);
 
-  const getRecipes = async () => {
-    const response = await fetch(`https://api.edamam.com/search?q=chicken&app_id=${APP_ID}&app_key=${APP_KEY}`);
-    const data = await response.json();
-    setRecipes(data.hits);
+  // const getRecipes = async () => {
+  //   const response = await fetch(`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+  //   const data = await response.json();
+  //   setRecipes(data.hits);
+  // }
 
-  }
 
   const updateSearch = event => {
     setSearch(event.target.value);
   }
 
+  const getSearch = (event) => {
+    event.preventDefault();
+    setQuery(search);
+    setSearch('');
+  }
+
   return(
     <div className="App">
-      <form className="search-form">
+      <form className="search-form" onSubmit={getSearch}>
         <input className="search-bar" type="text" value={search} onChange={updateSearch} />
         <button className="search-button" type="submit">Search</button>
       </form>
-      {recipes.map(recipe => (
-        <Recipe key={recipe.recipe.label} title={recipe.recipe.label} calories={recipe.recipe.calories} image={recipe.recipe.image} />
-      ))}
+      <div className="recipes">
+        {recipes.map(recipe => (
+          <Recipe key={recipe.recipe.label} 
+                  title={recipe.recipe.label} 
+                  calories={recipe.recipe.calories} 
+                  image={recipe.recipe.image} 
+                  ingredients={recipe.recipe.ingredients} />
+        ))}
+      </div>
     </div>
   )
 }
